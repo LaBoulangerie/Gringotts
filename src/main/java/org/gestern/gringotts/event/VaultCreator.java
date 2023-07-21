@@ -40,7 +40,7 @@ public class VaultCreator implements Listener {
                 Sign.class
         );
 
-        if (optionalSign.isEmpty()) {
+        if (optionalSign.isPresent()) {
             return;
         }
 
