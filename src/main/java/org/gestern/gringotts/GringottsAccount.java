@@ -1,8 +1,17 @@
 package org.gestern.gringotts;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.Tag;
 import org.bukkit.block.ShulkerBox;
@@ -15,12 +24,6 @@ import org.gestern.gringotts.accountholder.PlayerAccountHolder;
 import org.gestern.gringotts.api.TransactionResult;
 import org.gestern.gringotts.currency.Denomination;
 import org.gestern.gringotts.data.DAO;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.*;
 
 /**
  * Implementation of inventory-based accounts with a virtual overflow capacity.
@@ -329,7 +332,7 @@ public class GringottsAccount {
 
     public long removeFromShulkerBox(long remaining, Inventory inventory) {
         for (ItemStack itemStack : inventory.getContents()) {
-            if (Tag.SHULKER_BOXES.isTagged(itemStack.getType()) && itemStack.getItemMeta() instanceof BlockStateMeta) {
+            if (itemStack != null && Tag.SHULKER_BOXES.isTagged(itemStack.getType()) && itemStack.getItemMeta() instanceof BlockStateMeta) {
                 BlockStateMeta blockState = (BlockStateMeta) itemStack.getItemMeta();
                 if (blockState.getBlockState() instanceof ShulkerBox) {
                     ShulkerBox shulkerBox = (ShulkerBox) blockState.getBlockState();

@@ -97,7 +97,7 @@ public class GringottsCurrency {
             return 0;
         }
 
-        if (Configuration.CONF.includeShulkerBoxes && Tag.SHULKER_BOXES.isTagged(stack.getType())) {
+        if (stack != null && Configuration.CONF.includeShulkerBoxes && Tag.SHULKER_BOXES.isTagged(stack.getType())) {
             if (stack.getItemMeta() instanceof BlockStateMeta) {
                 BlockStateMeta blockState = (BlockStateMeta) stack.getItemMeta();
                 if (blockState.getBlockState() instanceof ShulkerBox) {
