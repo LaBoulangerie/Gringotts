@@ -14,6 +14,7 @@ import org.gestern.gringotts.accountholder.PlayerAccountHolder;
 import org.gestern.gringotts.api.TransactionResult;
 import org.gestern.gringotts.currency.Denomination;
 import org.gestern.gringotts.data.DAO;
+import org.gestern.gringotts.event.AccountBalanceChangeEvent;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -204,6 +205,7 @@ public class GringottsAccount {
             }
 
             if (remaining == 0) {
+                Bukkit.getPluginManager().callEvent(new AccountBalanceChangeEvent(owner, this.getBalance()));
                 return TransactionResult.SUCCESS;
             }
 
@@ -316,6 +318,7 @@ public class GringottsAccount {
                 dao.storeCents(this, cents - remaining);
             }
 
+            Bukkit.getPluginManager().callEvent(new AccountBalanceChangeEvent(owner, this.getBalance()));
             return TransactionResult.SUCCESS;
         };
 

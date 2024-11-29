@@ -84,6 +84,7 @@ public class AccountListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onSignBreak(BlockDestroyEvent event) {
         if (Tag.SIGNS.isTagged(event.getBlock().getType())) {
+            //TODO: call event
             Gringotts.instance.getDao().deleteAccountChest(
                 event.getBlock().getWorld().getName(),
                 event.getBlock().getX(),
@@ -105,6 +106,7 @@ public class AccountListener implements Listener {
 
         chest.setCachedBalance(chest.balance(true));
         Gringotts.instance.getDao().updateChestBalance(chest, chest.getCachedBalance());
+        Bukkit.getPluginManager().callEvent(new AccountBalanceChangeEvent(chest.account.owner, chest.account.getBalance()));
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -117,6 +119,7 @@ public class AccountListener implements Listener {
                     public void run() {
                         chest.setCachedBalance(chest.balance(true));
                         Gringotts.instance.getDao().updateChestBalance(chest, chest.getCachedBalance());
+                        Bukkit.getPluginManager().callEvent(new AccountBalanceChangeEvent(chest.account.owner, chest.account.getBalance()));
                     }
                 }.runTask(Gringotts.instance);
             }
@@ -129,6 +132,7 @@ public class AccountListener implements Listener {
                     public void run() {
                         chest.setCachedBalance(chest.balance(true));
                         Gringotts.instance.getDao().updateChestBalance(chest, chest.getCachedBalance());
+                        Bukkit.getPluginManager().callEvent(new AccountBalanceChangeEvent(chest.account.owner, chest.account.getBalance()));
                     }
                 }.runTask(Gringotts.instance);
             }
@@ -145,6 +149,7 @@ public class AccountListener implements Listener {
                     public void run() {
                         chest.setCachedBalance(chest.balance(true));
                         Gringotts.instance.getDao().updateChestBalance(chest, chest.getCachedBalance());
+                        Bukkit.getPluginManager().callEvent(new AccountBalanceChangeEvent(chest.account.owner, chest.account.getBalance()));
                     }
                 }.runTask(Gringotts.instance);
             }
@@ -160,6 +165,11 @@ public class AccountListener implements Listener {
                 return;
             }
         }
+    }
+
+    @EventHandler
+    public void onAccountBalanceChange(AccountBalanceChangeEvent event) {
+        Gringotts.instance.getLogger().info("Balance change: " + event.holder.getId());
     }
 
     /**
