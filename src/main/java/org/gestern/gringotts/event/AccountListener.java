@@ -167,11 +167,6 @@ public class AccountListener implements Listener {
         }
     }
 
-    @EventHandler
-    public void onAccountBalanceChange(AccountBalanceChangeEvent event) {
-        Gringotts.instance.getLogger().info("Balance change: " + event.holder.getId());
-    }
-
     /**
      * Get the AccountChest associated with this {@link InventoryHolder}
      * @param holder
