@@ -55,4 +55,9 @@ public class AccountBalanceChangeEvent extends Event {
         return holder;
     }
 
+    @Override
+    public String toString() {
+        return this.getClass().getSimpleName() + "{holder=" + this.holder.getId() + ",value=" + this.balance + "}";
+    }
+
 }
