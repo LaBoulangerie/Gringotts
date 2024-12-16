@@ -6,6 +6,7 @@ import java.util.regex.Pattern;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.Tag;
 import org.bukkit.block.Sign;
 import org.bukkit.event.EventHandler;
@@ -21,6 +22,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.gestern.gringotts.AccountChest;
 import org.gestern.gringotts.Configuration;
 import org.gestern.gringotts.Gringotts;
+import org.gestern.gringotts.GringottsAccount;
 import org.gestern.gringotts.Util;
 
 import com.destroystokyo.paper.event.block.BlockDestroyEvent;
@@ -83,13 +85,11 @@ public class AccountListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onSignBreak(BlockDestroyEvent event) {
         if (Tag.SIGNS.isTagged(event.getBlock().getType())) {
-            //TODO: @Grooble, call event ? Balance Change ? PlayerVaultDestroyEvent ?
-            Gringotts.instance.getDao().deleteAccountChest(
-                event.getBlock().getWorld().getName(),
-                event.getBlock().getX(),
-                event.getBlock().getY(),
-                event.getBlock().getZ()
-            );
+            AccountChest chest = getAccountChestFromLocation(event.getBlock().getLocation());
+            if (Gringotts.instance.getDao().deleteAccountChest(chest)) {
+                GringottsAccount account = chest.getAccount();
+                Bukkit.getPluginManager().callEvent(new AccountBalanceChangeEvent(account.owner, account.getBalance()));
+            }
         }
     }
 
@@ -173,13 +173,22 @@ public class AccountListener implements Listener {
      * @return the {@link AccountChest} or null if none was found
      */
     private AccountChest getAccountChestFromHolder(Inventory holder) {
+        return getAccountChestFromLocation(holder.getLocation());
+    }
+
+    /**
+     * Get the AccountChest from location
+     * @param location
+     * @return the {@link AccountChest} or null if none was found
+     */
+    private AccountChest getAccountChestFromLocation(Location location) {
         for (AccountChest chest : Gringotts.instance.getDao().retrieveChests()) {
             if (!chest.isChestLoaded()) continue; // For a chest to be open or interacted with, it needs to be loaded
 
-            if (chest.matchesLocation(holder.getLocation())) {
+            if (chest.matchesLocation(location)) {
                 return chest;
             }
         }
         return null;
-    }
+    } 
 }
