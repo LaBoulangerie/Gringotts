@@ -8,10 +8,12 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Tag;
+import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockDispenseEvent;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
@@ -84,14 +86,24 @@ public class AccountListener implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onSignBreak(BlockDestroyEvent event) {
-        if (Tag.SIGNS.isTagged(event.getBlock().getType())) {
-            AccountChest chest = getAccountChestFromLocation(event.getBlock().getLocation());
+        onSignBreak(event.getBlock());
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onSignBreak(BlockBreakEvent event) {
+        onSignBreak(event.getBlock());
+    }
+
+    private void onSignBreak(Block block) {
+        if (Tag.SIGNS.isTagged(block.getType())) {
+            AccountChest chest = getAccountChestFromLocation(block.getLocation());
             if (Gringotts.instance.getDao().deleteAccountChest(chest)) {
                 GringottsAccount account = chest.getAccount();
                 Bukkit.getPluginManager().callEvent(new AccountBalanceChangeEvent(account.owner, account.getBalance()));
             }
         }
     }
+
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onInventoryClose(InventoryCloseEvent event) {
