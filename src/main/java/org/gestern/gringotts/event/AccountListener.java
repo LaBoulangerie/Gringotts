@@ -185,11 +185,18 @@ public class AccountListener implements Listener {
      * @return the {@link AccountChest} or null if none was found
      */
     private AccountChest getAccountChestFromHolder(Inventory holder) {
-        return getAccountChestFromLocation(holder.getLocation());
+        for (AccountChest chest : Gringotts.instance.getDao().retrieveChests()) {
+            if (!chest.isChestLoaded()) continue; // For a chest to be open or interacted with, it needs to be loaded
+
+            if (chest.matchesLocation(holder.getLocation())) {
+                return chest;
+            }
+        }
+        return null;
     }
 
     /**
-     * Get the AccountChest from location
+     * Get the AccountChest from its sign's location
      * @param location
      * @return the {@link AccountChest} or null if none was found
      */
@@ -197,7 +204,7 @@ public class AccountListener implements Listener {
         for (AccountChest chest : Gringotts.instance.getDao().retrieveChests()) {
             if (!chest.isChestLoaded()) continue; // For a chest to be open or interacted with, it needs to be loaded
 
-            if (chest.matchesLocation(location)) {
+            if (chest.sign.getLocation().equals(location)) {
                 return chest;
             }
         }
