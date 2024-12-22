@@ -80,6 +80,18 @@ public class AccountListener implements Listener {
             final VaultCreationEvent creation = new PlayerVaultCreationEvent(type, event);
 
             Bukkit.getServer().getPluginManager().callEvent(creation);
+
+            if (creation.isValid()) {
+                new BukkitRunnable() {
+                    @Override
+                    public void run() {
+                        AccountChest chest = getAccountChestFromSign(event.getBlock().getLocation());
+                        if (chest.balance(true) > 0) {
+                            Bukkit.getPluginManager().callEvent(new AccountBalanceChangeEvent(chest.account.owner, chest.account.getBalance()));
+                        }
+                    }
+                }.runTask(Gringotts.instance);
+            }
         }
     }
 
