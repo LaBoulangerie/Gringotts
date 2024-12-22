@@ -97,18 +97,15 @@ public class AccountChest {
 
     public boolean matchesLocation(Location loc) {
         if (this.containerLocations.isEmpty()) {
-            containerLocations.add(sign.getLocation());
-
             InventoryHolder holder = chest();
-            if (holder != null) {
-                if (holder.getInventory() instanceof DoubleChestInventory) {
-                    DoubleChestInventory doubleChest = (DoubleChestInventory) holder.getInventory();
-    
-                    containerLocations.add(doubleChest.getLeftSide().getLocation());
-                    containerLocations.add(doubleChest.getRightSide().getLocation());
-                } else {
-                    containerLocations.add(holder.getInventory().getLocation());
-                }
+
+            if (holder.getInventory() instanceof DoubleChestInventory) {
+                DoubleChestInventory doubleChest = (DoubleChestInventory) holder.getInventory();
+
+                containerLocations.add(doubleChest.getLeftSide().getLocation());
+                containerLocations.add(doubleChest.getRightSide().getLocation());
+            } else {
+                containerLocations.add(holder.getInventory().getLocation());
             }
         }
         loc = loc.toBlockLocation();
