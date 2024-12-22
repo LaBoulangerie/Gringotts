@@ -18,7 +18,6 @@ import org.bukkit.event.block.BlockDispenseEvent;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryMoveItemEvent;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.gestern.gringotts.AccountChest;
@@ -96,7 +95,7 @@ public class AccountListener implements Listener {
 
     private void onSignBreak(Block block) {
         if (Tag.SIGNS.isTagged(block.getType())) {
-            AccountChest chest = getAccountChestFromLocation(block.getLocation());
+            AccountChest chest = getAccountChestFromSign(block.getLocation());
             if (Gringotts.instance.getDao().deleteAccountChest(chest)) {
                 GringottsAccount account = chest.getAccount();
                 Bukkit.getPluginManager().callEvent(new AccountBalanceChangeEvent(account.owner, account.getBalance()));
@@ -109,7 +108,7 @@ public class AccountListener implements Listener {
     public void onInventoryClose(InventoryCloseEvent event) {
         if (!Util.isValidInventory(event.getInventory().getType())) return;
 
-        AccountChest chest = getAccountChestFromHolder(event.getInventory());
+        AccountChest chest = getAccountChestFromContainer(event.getInventory().getLocation());
         if (chest == null) return;
 
         chest.setCachedBalance(chest.balance(true));
@@ -121,7 +120,7 @@ public class AccountListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onInventoryMoveItem(InventoryMoveItemEvent event) {
         if (Util.isValidInventory(event.getSource().getType())) {
-            AccountChest chest = getAccountChestFromHolder(event.getSource());
+            AccountChest chest = getAccountChestFromContainer(event.getSource().getLocation());
             if (chest != null) {
                 new BukkitRunnable() {
                     @Override
@@ -135,7 +134,7 @@ public class AccountListener implements Listener {
             }
         }
         if (event.getDestination() != null && Util.isValidInventory(event.getDestination().getType())) {
-            AccountChest chest = getAccountChestFromHolder(event.getDestination());
+            AccountChest chest = getAccountChestFromContainer(event.getDestination().getLocation());
             if (chest != null) {
                 new BukkitRunnable() {
                     @Override
@@ -152,19 +151,17 @@ public class AccountListener implements Listener {
 
     @EventHandler
     public void onDispenseEvent(BlockDispenseEvent event) {
-        if (event.getBlock().getState() instanceof InventoryHolder) {
-            AccountChest chest = getAccountChestFromHolder(((InventoryHolder) event.getBlock().getState()).getInventory());
-            if (chest != null) {
-                new BukkitRunnable() {
-                    @Override
-                    public void run() {
-                        chest.setCachedBalance(chest.balance(true));
-                        if (Gringotts.instance.getDao().updateChestBalance(chest, chest.getCachedBalance())) {
-                            Bukkit.getPluginManager().callEvent(new AccountBalanceChangeEvent(chest.account.owner, chest.account.getBalance()));
-                        }
+        AccountChest chest = getAccountChestFromContainer(event.getBlock().getLocation());
+        if (chest != null) {
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+                    chest.setCachedBalance(chest.balance(true));
+                    if (Gringotts.instance.getDao().updateChestBalance(chest, chest.getCachedBalance())) {
+                        Bukkit.getPluginManager().callEvent(new AccountBalanceChangeEvent(chest.account.owner, chest.account.getBalance()));
                     }
-                }.runTask(Gringotts.instance);
-            }
+                }
+            }.runTask(Gringotts.instance);
         }
     }
 
@@ -184,11 +181,11 @@ public class AccountListener implements Listener {
      * @param holder
      * @return the {@link AccountChest} or null if none was found
      */
-    private AccountChest getAccountChestFromHolder(Inventory holder) {
+    private AccountChest getAccountChestFromContainer(Location location) {
         for (AccountChest chest : Gringotts.instance.getDao().retrieveChests()) {
             if (!chest.isChestLoaded()) continue; // For a chest to be open or interacted with, it needs to be loaded
 
-            if (chest.matchesLocation(holder.getLocation())) {
+            if (chest.matchesLocation(location)) {
                 return chest;
             }
         }
@@ -200,7 +197,7 @@ public class AccountListener implements Listener {
      * @param location
      * @return the {@link AccountChest} or null if none was found
      */
-    private AccountChest getAccountChestFromLocation(Location location) {
+    private AccountChest getAccountChestFromSign(Location location) {
         for (AccountChest chest : Gringotts.instance.getDao().retrieveChests()) {
             if (!chest.isChestLoaded()) continue; // For a chest to be open or interacted with, it needs to be loaded
 
