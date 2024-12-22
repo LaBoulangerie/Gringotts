@@ -96,6 +96,8 @@ public class AccountListener implements Listener {
     private void onSignBreak(Block block) {
         if (Tag.SIGNS.isTagged(block.getType())) {
             AccountChest chest = getAccountChestFromSign(block.getLocation());
+            if (chest == null) return;
+            
             if (Gringotts.instance.getDao().deleteAccountChest(chest)) {
                 GringottsAccount account = chest.getAccount();
                 Bukkit.getPluginManager().callEvent(new AccountBalanceChangeEvent(account.owner, account.getBalance()));
