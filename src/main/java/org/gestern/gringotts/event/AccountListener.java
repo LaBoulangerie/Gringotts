@@ -96,16 +96,16 @@ public class AccountListener implements Listener {
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-    public void onSignBreak(BlockDestroyEvent event) {
-        onSignBreak(event.getBlock());
+    public void onBlockDestroy(BlockDestroyEvent event) {
+        onBlockBreak(event.getBlock());
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-    public void onSignBreak(BlockBreakEvent event) {
-        onSignBreak(event.getBlock());
+    public void onBlockBreak(BlockBreakEvent event) {
+        onBlockBreak(event.getBlock());
     }
 
-    private void onSignBreak(Block block) {
+    private void onBlockBreak(Block block) {
         if (Tag.SIGNS.isTagged(block.getType())) {
             AccountChest chest = getAccountChestFromSign(block.getLocation());
             if (chest == null) return;
@@ -114,6 +114,11 @@ public class AccountListener implements Listener {
                 GringottsAccount account = chest.getAccount();
                 Bukkit.getPluginManager().callEvent(new AccountBalanceChangeEvent(account.owner, account.getBalance()));
             }
+        } else if (Util.isValidContainer(block.getType())) {
+            AccountChest chest = getAccountChestFromContainer(block.getLocation(), true);
+            if (chest == null) return;
+            GringottsAccount account = chest.getAccount();
+            Bukkit.getPluginManager().callEvent(new AccountBalanceChangeEvent(account.owner, account.getBalance()));
         }
     }
 
@@ -196,10 +201,14 @@ public class AccountListener implements Listener {
      * @return the {@link AccountChest} or null if none was found
      */
     private AccountChest getAccountChestFromContainer(Location location) {
+        return getAccountChestFromContainer(location, false);
+    }
+
+    private AccountChest getAccountChestFromContainer(Location location, boolean updateContainerLocations) {
         for (AccountChest chest : Gringotts.instance.getDao().retrieveChests()) {
             if (!chest.isChestLoaded()) continue; // For a chest to be open or interacted with, it needs to be loaded
 
-            if (chest.matchesLocation(location)) {
+            if (chest.matchesLocation(location, updateContainerLocations)) {
                 return chest;
             }
         }
