@@ -127,7 +127,11 @@ public class AccountListener implements Listener {
     public void onInventoryClose(InventoryCloseEvent event) {
         if (!Util.isValidInventory(event.getInventory().getType())) return;
 
-        AccountChest chest = getAccountChestFromContainer(event.getInventory().getLocation());
+        Location loc = event.getInventory().getLocation();
+        if (loc == null) return; // ignore plugin inventory menu
+
+
+        AccountChest chest = getAccountChestFromContainer(loc);
         if (chest == null) return;
 
         chest.setCachedBalance(chest.balance(true));
