@@ -111,14 +111,24 @@ public class AccountListener implements Listener {
             if (chest == null) return;
             
             if (Gringotts.instance.getDao().deleteAccountChest(chest)) {
-                GringottsAccount account = chest.getAccount();
-                Bukkit.getPluginManager().callEvent(new AccountBalanceChangeEvent(account.owner, account.getBalance()));
+                new BukkitRunnable() {
+                    @Override
+                    public void run() {
+                        GringottsAccount account = chest.getAccount();
+                        Bukkit.getPluginManager().callEvent(new AccountBalanceChangeEvent(account.owner, account.getBalance()));
+                    }
+                }.runTask(Gringotts.instance);
             }
         } else if (Util.isValidContainer(block.getType())) {
             AccountChest chest = getAccountChestFromContainer(block.getLocation(), true);
             if (chest == null) return;
-            GringottsAccount account = chest.getAccount();
-            Bukkit.getPluginManager().callEvent(new AccountBalanceChangeEvent(account.owner, account.getBalance()));
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+                    GringottsAccount account = chest.getAccount();
+                    Bukkit.getPluginManager().callEvent(new AccountBalanceChangeEvent(account.owner, account.getBalance()));
+                }
+            }.runTask(Gringotts.instance);
         }
     }
 
