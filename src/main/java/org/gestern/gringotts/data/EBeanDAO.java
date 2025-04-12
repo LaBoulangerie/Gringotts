@@ -14,11 +14,13 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.gestern.gringotts.AccountChest;
 import org.gestern.gringotts.Gringotts;
 import org.gestern.gringotts.GringottsAccount;
 import org.gestern.gringotts.Util;
 import org.gestern.gringotts.accountholder.AccountHolder;
+import org.gestern.gringotts.event.AccountBalanceChangeEvent;
 import org.gestern.gringotts.event.CalculateStartBalanceEvent;
 
 import io.ebean.Database;
@@ -86,8 +88,18 @@ public class EBeanDAO implements DAO {
     @Override
     public synchronized boolean deleteAccountChest(AccountChest chest) {
         Sign mark = chest.sign;
+        GringottsAccount account = chest.getAccount();
 
-        return deleteAccountChest(mark.getWorld().getName(), mark.getX(), mark.getY(), mark.getZ());
+        if (deleteAccountChest(mark.getWorld().getName(), mark.getX(), mark.getY(), mark.getZ())) {
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+                    Bukkit.getPluginManager().callEvent(new AccountBalanceChangeEvent(account.owner, account.getBalance()));
+                }
+            }.runTask(Gringotts.instance);
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -472,6 +484,11 @@ public class EBeanDAO implements DAO {
         updateChest.setParameter("y", chest.sign.getY());
         updateChest.setParameter("z", chest.sign.getZ());
         updateChest.setParameter("total_value", balance);
-        return updateChest.execute() > 0;
+
+        if (updateChest.execute() > 0) {
+            Bukkit.getPluginManager().callEvent(new AccountBalanceChangeEvent(chest.account.owner, chest.account.getBalance()));
+            return true;
+        }
+        return false;
     }
 }

@@ -110,15 +110,7 @@ public class AccountListener implements Listener {
             AccountChest chest = getAccountChestFromSign(block.getLocation());
             if (chest == null) return;
             
-            if (Gringotts.instance.getDao().deleteAccountChest(chest)) {
-                new BukkitRunnable() {
-                    @Override
-                    public void run() {
-                        GringottsAccount account = chest.getAccount();
-                        Bukkit.getPluginManager().callEvent(new AccountBalanceChangeEvent(account.owner, account.getBalance()));
-                    }
-                }.runTask(Gringotts.instance);
-            }
+            Gringotts.instance.getDao().deleteAccountChest(chest);
         } else if (Util.isValidContainer(block.getType())) {
             AccountChest chest = getAccountChestFromContainer(block.getLocation(), true);
             if (chest == null) return;
@@ -145,9 +137,6 @@ public class AccountListener implements Listener {
         if (chest == null) return;
 
         chest.setCachedBalance(chest.balance(true));
-        if (Gringotts.instance.getDao().updateChestBalance(chest, chest.getCachedBalance())) {
-            Bukkit.getPluginManager().callEvent(new AccountBalanceChangeEvent(chest.account.owner, chest.account.getBalance()));
-        }
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -159,9 +148,6 @@ public class AccountListener implements Listener {
                     @Override
                     public void run() {
                         chest.setCachedBalance(chest.balance(true));
-                        if (Gringotts.instance.getDao().updateChestBalance(chest, chest.getCachedBalance())) {
-                            Bukkit.getPluginManager().callEvent(new AccountBalanceChangeEvent(chest.account.owner, chest.account.getBalance()));
-                        }
                     }
                 }.runTask(Gringotts.instance);
             }
@@ -173,9 +159,6 @@ public class AccountListener implements Listener {
                     @Override
                     public void run() {
                         chest.setCachedBalance(chest.balance(true));
-                        if (Gringotts.instance.getDao().updateChestBalance(chest, chest.getCachedBalance())) {
-                            Bukkit.getPluginManager().callEvent(new AccountBalanceChangeEvent(chest.account.owner, chest.account.getBalance()));
-                        }
                     }
                 }.runTask(Gringotts.instance);
             }
@@ -190,9 +173,6 @@ public class AccountListener implements Listener {
                 @Override
                 public void run() {
                     chest.setCachedBalance(chest.balance(true));
-                    if (Gringotts.instance.getDao().updateChestBalance(chest, chest.getCachedBalance())) {
-                        Bukkit.getPluginManager().callEvent(new AccountBalanceChangeEvent(chest.account.owner, chest.account.getBalance()));
-                    }
                 }
             }.runTask(Gringotts.instance);
         }
