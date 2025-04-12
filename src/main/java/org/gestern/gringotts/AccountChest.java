@@ -96,6 +96,14 @@ public class AccountChest {
     }
 
     public boolean matchesLocation(Location loc) {
+        return matchesLocation(loc, false);
+    }
+
+    public boolean matchesLocation(Location loc, boolean updateContainerLocations) {
+        if (updateContainerLocations) {
+            this.containerLocations.clear();
+        }
+
         if (this.containerLocations.isEmpty()) {
             InventoryHolder holder = chest();
 
